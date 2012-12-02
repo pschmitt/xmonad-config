@@ -43,19 +43,18 @@ if [[ $SCREENCOUNT -gt 1 ]]; then
     -e \"button3=;onstart=lower\")"
 fi
 
-if [[ "${HOST:l}" != "laxlinux" ]]; then
-    while; do
-        if nmap -sP --max-retries=1 --host-timeout=150ms laxlinux > /dev/null 2>&1 | grep "is up" > /dev/null; then
-            sed -i 's/\(mpd_host\) localhost/\1 laxlinux/' $CONKYRC
-        else
-            sed -i 's/\(mpd_host\) laxlinux/\1 localhost/' $CONKYRC 
-        fi
-        sleep 300
-    done &
-else
-    sed -i 's/\(mpd_host\) laxlinux/\1 localhost/' $CONKYRC 
-fi
+#if [[ "${HOST:l}" != "laxlinux" ]]; then
+#    while; do
+#        if nmap -sP --max-retries=1 --host-timeout=150ms laxlinux > /dev/null 2>&1 | grep "is up" > /dev/null; then
+#            sed -i 's/\(mpd_host\) localhost/\1 laxlinux/' $CONKYRC
+#        else
+#            sed -i 's/\(mpd_host\) laxlinux/\1 localhost/' $CONKYRC 
+#        fi
+#        sleep 300
+#    done &
+#else
+#    sed -i 's/\(mpd_host\) laxlinux/\1 localhost/' $CONKYRC 
+#fi
 
 conky -c $CONKYRC | eval $DZEN_CMD & # | tee > /var/log/statusbar.log
-#watch -n 300 "nmap -sP --max-retries=1 --host-timeout=150ms laxlinux > /dev/null 2>&1 | grep "is up" > /dev/null"
-#conky | dzen2 -bg '#161616' -fg '#8c8b8e' -y 20 -xs 1 -fn Profont-11 -expand l
+
