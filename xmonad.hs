@@ -29,6 +29,7 @@ import XMonad.Layout.MouseResizableTile
 import XMonad.Layout.Named -- Rename Layouts
 import XMonad.Layout.ResizableTile
 import XMonad.Layout.SimplestFloat
+import XMonad.Layout.LayoutScreens
 import XMonad.Layout.Tabbed
 import XMonad.Layout.ToggleLayouts
 import XMonad.Layout.WindowNavigation
@@ -183,57 +184,60 @@ main = do
 --
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     [ -- Scratchpads
-      ((modm .|. shiftMask, xK_n ), namedScratchpadAction myScratchPads "music"),
-      ((modm .|. shiftMask, xK_t ), namedScratchpadAction myScratchPads "terminal"),
-      ((modm .|. shiftMask, xK_v ), namedScratchpadAction myScratchPads "keyboard"),
-      ((modm , xK_e ), namedScratchpadAction myScratchPads "filebrow"),
+      ((modm .|. shiftMask, xK_n), namedScratchpadAction myScratchPads "music"),
+      ((modm .|. shiftMask, xK_t), namedScratchpadAction myScratchPads "terminal"),
+      ((modm .|. shiftMask, xK_v), namedScratchpadAction myScratchPads "keyboard"),
+      ((modm , xK_e), namedScratchpadAction myScratchPads "filebrow"),
       -- Launcher
-      ((modm , xK_p ), shellPrompt myXPConfig),
-      ((modm , xK_r ), shellPrompt myXPConfig),
+      ((modm , xK_p), shellPrompt myXPConfig),
+      ((modm , xK_r), shellPrompt myXPConfig),
       -- Kill client
-      ((modm , xK_c ), kill),
-      ((modm  .|. shiftMask, xK_c ), kill),
+      ((modm , xK_c), kill),
+      ((modm  .|. shiftMask, xK_c), kill),
       -- Pasting
-      ((shiftMask, xK_Insert ), pasteSelection),
+      ((shiftMask, xK_Insert), pasteSelection),
       -- Layout manipulation
       ((modm , xK_space ), sendMessage NextLayout),
       ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf),
-      ((modm , xK_n ), refresh),
-      ((modm , xK_Tab ), windows W.focusDown ),
-      ((modm , xK_j ), windows W.focusDown ),
-      ((modm , xK_k ), windows W.focusUp ),
-      ((modm , xK_m ), windows W.focusMaster),
-      ((modm , xK_Return ), windows W.swapMaster ),
-      ((modm .|. shiftMask, xK_j ), windows W.swapDown ),
-      ((modm .|. shiftMask, xK_k ), windows W.swapUp ),
-      ((modm , xK_h ), sendMessage Shrink),
-      ((modm , xK_l ), sendMessage Expand),
-      ((modm , xK_t ), withFocused $ windows . W.sink),
-      ((modm , xK_comma ), sendMessage (IncMasterN 1)),
-      ((modm , xK_period ), sendMessage (IncMasterN (-1))),
-      ((modm , xK_b ), sendMessage ToggleStruts),
+      ((modm , xK_n), refresh),
+      ((modm , xK_Tab), windows W.focusDown),
+      ((modm , xK_j), windows W.focusDown),
+      ((modm , xK_k), windows W.focusUp),
+      ((modm , xK_m), windows W.focusMaster),
+      ((modm , xK_Return), windows W.swapMaster),
+      ((modm .|. shiftMask, xK_j), windows W.swapDown),
+      ((modm .|. shiftMask, xK_k), windows W.swapUp),
+      ((modm , xK_h), sendMessage Shrink),
+      ((modm , xK_l), sendMessage Expand),
+      ((modm , xK_t), withFocused $ windows . W.sink),
+      ((modm , xK_comma), sendMessage (IncMasterN 1)),
+      ((modm , xK_period), sendMessage (IncMasterN (-1))),
+      ((modm , xK_b), sendMessage ToggleStruts),
       ((modm .|. controlMask, xK_w), sendMessage $ IncGap 25 XMonad.Layout.Gaps.R),  -- increment the right-hand gap
       ((modm .|. controlMask, xK_q), sendMessage $ DecGap 25 XMonad.Layout.Gaps.R),  -- decrement the right-hand gap
-      ((modm , xK_g ), goToSelected defaultGSConfig),
+      ((modm , xK_g), goToSelected defaultGSConfig),
       -- Exit / Restart
-      ((modm .|. shiftMask, xK_Escape ), io (exitWith ExitSuccess)),
-      ((modm .|. shiftMask, xK_r ), spawn restartCmd),
-      ((modm .|. mod1Mask , xK_r ), spawn restartCmd),
+      ((modm .|. shiftMask, xK_Escape), io (exitWith ExitSuccess)),
+      ((modm .|. shiftMask, xK_r), spawn restartCmd),
+      ((modm .|. mod1Mask , xK_r), spawn restartCmd),
       -- Dynamic WS
       ((modm .|. shiftMask, xK_BackSpace), removeWorkspace),
-      ((modm .|. shiftMask, xK_a ), addWorkspacePrompt myXPConfig),
-      ((modm .|. shiftMask, xK_b ), DO.swapWith Next AnyWS),
-      ((modm .|. shiftMask, xK_g ), DO.swapWith Prev AnyWS),
-      ((modm .|. shiftMask, xK_F2 ), renameWorkspace myXPConfig),
+      ((modm .|. shiftMask, xK_a), addWorkspacePrompt myXPConfig),
+      ((modm .|. shiftMask, xK_b), DO.swapWith Next AnyWS),
+      ((modm .|. shiftMask, xK_g), DO.swapWith Prev AnyWS),
+      ((modm .|. shiftMask, xK_F2), renameWorkspace myXPConfig),
       -- Sticky
       ((modm , xK_s ), windows copyToAll), -- Make focused window sticky
-      ((modm .|. shiftMask, xK_s ), killAllOtherCopies), -- Unstick window
+      ((modm .|. shiftMask, xK_s), killAllOtherCopies), -- Unstick window
       -- Maximize / Fullscreen
-      ((modm .|. shiftMask, xK_m ), withFocused (sendMessage . maximizeRestore)),
-      ((modm , xK_f ), sendMessage (Toggle "Full")),
+      ((modm .|. shiftMask, xK_m), withFocused (sendMessage . maximizeRestore)),
+      ((modm , xK_f ), sendMessage (Toggle "Full")), -- Fullscreen w/o hiding dock
+      ((modm .|. shiftMask, xK_f), do -- "real" fullscreen (hides dock)
+                                        sendMessage (Toggle "Full")
+                                        sendMessage ToggleStruts),
       -- Minimize
-      ((modm , xK_u ), withFocused minimizeWindow),
-      ((modm .|. shiftMask, xK_u ), sendMessage RestoreNextMinimizedWin)
+      ((modm , xK_u), withFocused minimizeWindow),
+      ((modm .|. shiftMask, xK_u), sendMessage RestoreNextMinimizedWin)
     ]
 
     ++
@@ -253,10 +257,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
     -- , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
     ++
-    [ (( modm, xK_Left) , DO.moveTo Prev (WSIs notSP)),
-      (( modm, xK_Right), DO.moveTo Next (WSIs notSP)),
-      (( modm, xK_Up) , toggleWS),
-      (( modm, xK_Down) , moveTo Next EmptyWS)]
+    [ ((modm, xK_Left), DO.moveTo Prev (WSIs notSP)),
+      ((modm, xK_Right), DO.moveTo Next (WSIs notSP)),
+      ((modm, xK_Up), toggleWS),
+      ((modm, xK_Down), moveTo Next EmptyWS)]
         where notSP = (return $ ("NSP" /=) . W.tag) :: X (WindowSpace -> Bool)
         -- | any workspace but scratchpad
         --shiftAndView dir = findWorkspace getSortByIndex dir (WSIs notSP) 1
