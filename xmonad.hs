@@ -154,7 +154,7 @@ instance UrgencyHook NotifyUrgencyHook where
 
 main = do
     d <- spawnPipe dzenStatusBar
-    xmonad $ withUrgencyHookC NotifyUrgencyHook urgencyConfig { suppressWhen = Focused }
+    xmonad $ withUrgencyHookC NotifyUrgencyHook urgencyConfig { suppressWhen = Visible }
            $ ewmh
            $ defaultConfig {
                  -- simple stuff
