@@ -4,6 +4,7 @@ cabal-dev
 *.hi
 *.chi
 *.chs.h
+*.un~
 .virthualenv
 history
 xmonad-x86_64-linux

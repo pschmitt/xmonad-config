@@ -12,7 +12,6 @@ import qualified XMonad.Actions.FlexibleResize as Flex -- Resize windows with mo
 import XMonad.Actions.GridSelect
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
-import XMonad.Hooks.ICCCMFocus
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.SetWMName
@@ -53,7 +52,7 @@ statusBarHeight = "14"
 --
 -- Fonts
 --
-myFont = "-*-tamsyn-*-*-*-*-9-*-*-*-*-*-*-*"
+myFont       = "-*-tamsyn-*-*-*-*-9-*-*-*-*-*-*-*"
 myUrgentFont = "-*-monospace-*-*-*-*-12-*-*-*-*-*-*-*"
 
 --
@@ -103,12 +102,12 @@ workWs = "uni"
 dlWs   = "dl"
 vidWs  = "vid"
 rdWs   = "rd"
-myWorkspaces = [mainWs,webWs,devWs,workWs,dlWs,vidWs,rdWs,"8","9"]
+myWorkspaces = [mainWs, webWs, devWs, workWs, dlWs, vidWs, rdWs, "8", "9"]
 
 --
 -- Layouts
 --
-myLayout = gaps [(XMonad.Layout.Gaps.R,0)]
+myLayout = gaps [(XMonad.Layout.Gaps.R, 0)]
          $ avoidStruts
          $ smartBorders
          $ maximize
@@ -133,11 +132,19 @@ myLayout = gaps [(XMonad.Layout.Gaps.R,0)]
 --
 -- Spawn commands
 --
-dzenBar1 = "dzen2 -xs 2 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" ++ statusBarHeight ++ "' -w '430' -ta 'l' -bg '" ++ colorDarkGray ++ "' -fg '" ++ colorWhiteAlt  ++ "' -fn '" ++ myFont  ++ "' -e 'button3=;onstart=lower'"
-dzenBar2 = "dzen2 -xs 1 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" ++ statusBarHeight ++ "' -w '430' -ta 'l' -bg '" ++ colorDarkGray ++ "' -fg '" ++ colorWhiteAlt  ++ "' -fn '" ++ myFont  ++ "' -e 'button3=;onstart=lower'"
-dzenStatusBar = "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ")\""
-restartCmd = "xkill -display :0 -id $(xwininfo -name 'xmonad_rbar' | grep 'Window id' | awk '{ print $4 }'); xkill -display :0-id $(xwininfo -name 'xmonad_lbar' | grep 'Window id' | awk '{ print $4 }'); xmonad --recompile; xmonad --restart;"
+dzenBar1 = "dzen2 -xs 1 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" ++ statusBarHeight ++ "' -w '430' -ta 'l' -bg '" ++ colorDarkGray ++ "' -fg '" ++ colorWhiteAlt  ++ "' -fn '" ++ myFont  ++ "' -e 'button3=;onstart=lower'"
+dzenBar2 = "dzen2 -xs 2 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" ++ statusBarHeight ++ "' -w '430' -ta 'l' -bg '" ++ colorDarkGray ++ "' -fg '" ++ colorWhiteAlt  ++ "' -fn '" ++ myFont  ++ "' -e 'button3=;onstart=lower'"
+dzenBar3 = "dzen2 -xs 3 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" ++ statusBarHeight ++ "' -w '430' -ta 'l' -bg '" ++ colorDarkGray ++ "' -fg '" ++ colorWhiteAlt  ++ "' -fn '" ++ myFont  ++ "' -e 'button3=;onstart=lower'"
+dzenStatusBar = "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ") >(" ++ dzenBar3 ++ ")\""
+-- if screenCount == 1 then
+--     dzenStatusBar = dzen1Bar
+-- else if screenCount == 2 then
+--     dzenStatusBar = "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ")\""
+-- else if screenCount == 3 then
+--     dzenStatusBar = "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ") >(" ++ dzenBar3 ++ ")\""
 
+restartCmd = "xkill -display :0 -id $(xwininfo -name 'xmonad_rbar' | grep 'Window id' | awk '{ print $4 }'); xkill -display :0-id $(xwininfo -name 'xmonad_lbar' | grep 'Window id' | awk '{ print $4 }'); xmonad --recompile; xmonad --restart;"
+-- testCmd = ""
 
 -- UrgencyHook
 -- https://github.com/vdemeester/xmonad-config/blob/master/.xmonad/xmonad.hs
@@ -174,8 +181,7 @@ main = do
                  layoutHook = myLayout,
                  manageHook = myManageHook,
                  handleEventHook = myEventHook,
-                 -- TODO: is that the right place/syntax for takeTopFocus ?
-                 logHook = takeTopFocus >> myLogHook d,
+                 logHook = myLogHook d,
                  startupHook = myStartupHook
              }
 
@@ -187,39 +193,40 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       ((modm .|. shiftMask, xK_n), namedScratchpadAction myScratchPads "music"),
       ((modm .|. shiftMask, xK_t), namedScratchpadAction myScratchPads "terminal"),
       ((modm .|. shiftMask, xK_v), namedScratchpadAction myScratchPads "keyboard"),
-      ((modm , xK_e), namedScratchpadAction myScratchPads "filebrow"),
+      ((modm, xK_e), namedScratchpadAction myScratchPads "filebrow"),
       -- Launcher
-      ((modm , xK_p), shellPrompt myXPConfig),
-      ((modm , xK_r), shellPrompt myXPConfig),
+      ((modm, xK_p), shellPrompt myXPConfig),
+      ((modm, xK_r), shellPrompt myXPConfig),
       -- Kill client
-      ((modm , xK_c), kill),
+      ((modm, xK_c), kill),
       ((modm  .|. shiftMask, xK_c), kill),
       -- Pasting
       ((shiftMask, xK_Insert), pasteSelection),
       -- Layout manipulation
-      ((modm , xK_space ), sendMessage NextLayout),
+      ((modm, xK_space ), sendMessage NextLayout),
       ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf),
-      ((modm , xK_n), refresh),
-      ((modm , xK_Tab), windows W.focusDown),
-      ((modm , xK_j), windows W.focusDown),
-      ((modm , xK_k), windows W.focusUp),
-      ((modm , xK_m), windows W.focusMaster),
-      ((modm , xK_Return), windows W.swapMaster),
+      ((modm, xK_n), refresh),
+      ((modm, xK_Tab), windows W.focusDown),
+      ((modm, xK_j), windows W.focusDown),
+      ((modm, xK_k), windows W.focusUp),
+      ((modm, xK_m), windows W.focusMaster),
+      ((modm, xK_Return), windows W.swapMaster),
       ((modm .|. shiftMask, xK_j), windows W.swapDown),
       ((modm .|. shiftMask, xK_k), windows W.swapUp),
-      ((modm , xK_h), sendMessage Shrink),
-      ((modm , xK_l), sendMessage Expand),
-      ((modm , xK_t), withFocused $ windows . W.sink),
-      ((modm , xK_comma), sendMessage (IncMasterN 1)),
-      ((modm , xK_period), sendMessage (IncMasterN (-1))),
-      ((modm , xK_b), sendMessage ToggleStruts),
-      ((modm .|. controlMask, xK_w), sendMessage $ IncGap 25 XMonad.Layout.Gaps.R),  -- increment the right-hand gap
-      ((modm .|. controlMask, xK_q), sendMessage $ DecGap 25 XMonad.Layout.Gaps.R),  -- decrement the right-hand gap
-      ((modm , xK_g), goToSelected defaultGSConfig),
+      ((modm, xK_h), sendMessage Shrink),
+      ((modm, xK_l), sendMessage Expand),
+      ((modm, xK_t), withFocused $ windows . W.sink),
+      ((modm, xK_comma), sendMessage (IncMasterN 1)),
+      ((modm, xK_period), sendMessage (IncMasterN (-1))),
+      ((modm, xK_b), sendMessage ToggleStruts),
+      ((modm .|. controlMask, xK_t), sendMessage $ ToggleGaps),
+      ((modm .|. controlMask, xK_a), sendMessage $ IncGap 20 XMonad.Layout.Gaps.R),  -- increment the right-hand gap
+      ((modm .|. controlMask, xK_s), sendMessage $ DecGap 20 XMonad.Layout.Gaps.R),  -- decrement the right-hand gap
+      ((modm, xK_g), goToSelected defaultGSConfig),
       -- Exit / Restart
       ((modm .|. shiftMask, xK_Escape), io (exitWith ExitSuccess)),
       ((modm .|. shiftMask, xK_r), spawn restartCmd),
-      ((modm .|. mod1Mask , xK_r), spawn restartCmd),
+      ((modm .|. mod1Mask, xK_r), spawn restartCmd),
       -- Dynamic WS
       ((modm .|. shiftMask, xK_BackSpace), removeWorkspace),
       ((modm .|. shiftMask, xK_a), addWorkspacePrompt myXPConfig),
@@ -227,17 +234,19 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       ((modm .|. shiftMask, xK_g), DO.swapWith Prev AnyWS),
       ((modm .|. shiftMask, xK_F2), renameWorkspace myXPConfig),
       -- Sticky
-      ((modm , xK_s ), windows copyToAll), -- Make focused window sticky
+      ((modm, xK_s ), windows copyToAll), -- Make focused window sticky
       ((modm .|. shiftMask, xK_s), killAllOtherCopies), -- Unstick window
       -- Maximize / Fullscreen
       ((modm .|. shiftMask, xK_m), withFocused (sendMessage . maximizeRestore)),
-      ((modm , xK_f ), sendMessage (Toggle "Full")), -- Fullscreen w/o hiding dock
+      ((modm, xK_f), sendMessage (Toggle "Full")), -- Fullscreen w/o hiding dock
       ((modm .|. shiftMask, xK_f), do -- "real" fullscreen (hides dock)
                                         sendMessage (Toggle "Full")
                                         sendMessage ToggleStruts),
       -- Minimize
-      ((modm , xK_u), withFocused minimizeWindow),
+      ((modm, xK_u), withFocused minimizeWindow),
       ((modm .|. shiftMask, xK_u), sendMessage RestoreNextMinimizedWin)
+      -- Test
+      -- ((modm, xK_y), spawn testCmd)
     ]
 
     ++
@@ -286,8 +295,8 @@ myManageHook = composeAll
       className =? "Gimp" --> doFloat,
       className =? "Zenity" --> doFloat,
       className =? "XVkbd"   --> doIgnore,
-      className =? "Keyboard" --> doIgnore,
-      title     =? "Keyboard"      --> doIgnore,
+      --className =? "Keyboard" --> doIgnore,
+      --title     =? "Keyboard"      --> doIgnore,
       resource  =? "desktop_window" --> doIgnore,
       resource  =? "kdesktop" --> doIgnore,
      (className =? "Firefox" <&&> resource =? "Navigator") --> doF (W.shift webWs) <+> unfloat,
@@ -377,8 +386,7 @@ myLogHook h = dynamicLogWithPP $ defaultPP
                     "Maximize Minimize Tabbed Simplest"      -> "[=]"
                     "Maximize Minimize Full"                 -> "[F]"
                     "Maximize Minimize Grid"                 -> "[g]"
-                    "Maximize Minimize combining Tabbed Simplest and Tabbed Simplest with ResizableTall" -> "[*]"
-               )
+                    "Maximize Minimize combining Tabbed Simplest and Tabbed Simplest with ResizableTall" -> "[*]")
        }
 
 

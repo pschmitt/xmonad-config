@@ -27,21 +27,41 @@ DZEN_CMD="tee >(dzen2 \
     -fn \"$FONT\" \
     -e \"button3=;onstart=lower\")"
 
+case $SCREENCOUNT in
+    3)
+        DZEN_CMD="${DZEN_CMD} >(dzen2 \
+            -dock \
+            -title-name \"${DZEN_TITLE}_3\" \
+            -u \
+            -xs 3 \
+            -x \"$XPOS\" \
+            -y \"$YPOS\" \
+            -h \"$HEIGHT\" \
+            -ta \"$DZEN_TA\" \
+            -bg \"$BG\" \
+            -fg \"$FG\" \
+            -fn \"$FONT\" \
+            -e \"button3=;onstart=lower\")"
+        ;&
+    2)
+        DZEN_CMD="${DZEN_CMD} >(dzen2 \
+            -dock \
+            -title-name \"${DZEN_TITLE}_2\" \
+            -u \
+            -xs 2 \
+            -x \"$XPOS\" \
+            -y \"$YPOS\" \
+            -h \"$HEIGHT\" \
+            -ta \"$DZEN_TA\" \
+            -bg \"$BG\" \
+            -fg \"$FG\" \
+            -fn \"$FONT\" \
+            -e \"button3=;onstart=lower\")"
+        ;;
+esac
+
 if [[ $SCREENCOUNT -gt 1 ]]; then
-    DZEN_CMD="${DZEN_CMD} >(dzen2 \
-    -dock \
-    -title-name \"${DZEN_TITLE}_2\" \
-    -u \
-    -xs 2 \
-    -x \"$XPOS\" \
-    -y \"$YPOS\" \
-    -h \"$HEIGHT\" \
-    -ta \"$DZEN_TA\" \
-    -bg \"$BG\" \
-    -fg \"$FG\" \
-    -fn \"$FONT\" \
-    -e \"button3=;onstart=lower\")"
-fi
+    fi
 
 #if [[ "${HOST:l}" != "laxlinux" ]]; then
 #    while; do
