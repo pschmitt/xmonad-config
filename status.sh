@@ -1,4 +1,7 @@
 #!/bin/zsh
+# Author: Philipp Schmitt
+# Dependencies: xrdr (https://github.com/pschmitt/bin)
+# Version: 
 
 SCREENCOUNT=$(xrdr count)
 CONKYRC=$XDG_CONFIG_HOME/conky/conkyrc
@@ -59,22 +62,6 @@ case $SCREENCOUNT in
             -e \"button3=;onstart=lower\")"
         ;;
 esac
-
-if [[ $SCREENCOUNT -gt 1 ]]; then
-    fi
-
-#if [[ "${HOST:l}" != "laxlinux" ]]; then
-#    while; do
-#        if nmap -sP --max-retries=1 --host-timeout=150ms laxlinux > /dev/null 2>&1 | grep "is up" > /dev/null; then
-#            sed -i 's/\(mpd_host\) localhost/\1 laxlinux/' $CONKYRC
-#        else
-#            sed -i 's/\(mpd_host\) laxlinux/\1 localhost/' $CONKYRC 
-#        fi
-#        sleep 300
-#    done &
-#else
-#    sed -i 's/\(mpd_host\) laxlinux/\1 localhost/' $CONKYRC 
-#fi
 
 conky -c $CONKYRC | eval $DZEN_CMD & # | tee > /var/log/statusbar.log
 

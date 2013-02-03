@@ -10,6 +10,7 @@ import qualified XMonad.Actions.DynamicWorkspaceOrder as DO
 import XMonad.Actions.FindEmptyWorkspace -- Switch to an empty WS
 import qualified XMonad.Actions.FlexibleResize as Flex -- Resize windows with mouse from any corner
 import XMonad.Actions.GridSelect
+--import XMonad.Actions.UpdatePointer
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
@@ -40,11 +41,12 @@ import XMonad.Util.NamedScratchpad
 import XMonad.Util.NamedWindows (getName)
 import XMonad.Util.Paste
 import XMonad.Util.Run
+-- import XMonad.Util.SpawnOnce
 import XMonad.Util.WorkspaceCompare
 
 myTerminal = "urxvtc"
 myFocusFollowsMouse :: Bool
-myFocusFollowsMouse = False -- Disable sloppy focus
+myFocusFollowsMouse = True --False -- Sloppy focus
 myBorderWidth = 0
 defaultModMask = mod4Mask
 statusBarHeight = "14"
@@ -97,12 +99,13 @@ myXPConfig = defaultXPConfig {
 --
 mainWs = "#!"
 webWs  = "net"
+vidWs  = "vid"
+chrmWs = "y2t"
 devWs  = "dev"
 workWs = "uni"
 dlWs   = "dl"
-vidWs  = "vid"
 rdWs   = "rd"
-myWorkspaces = [mainWs, webWs, devWs, workWs, dlWs, vidWs, rdWs, "8", "9"]
+myWorkspaces = [mainWs, webWs, vidWs, chrmWs, devWs, workWs, dlWs, rdWs, "9"]
 
 --
 -- Layouts
@@ -136,6 +139,10 @@ dzenBar1 = "dzen2 -xs 1 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" +
 dzenBar2 = "dzen2 -xs 2 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" ++ statusBarHeight ++ "' -w '430' -ta 'l' -bg '" ++ colorDarkGray ++ "' -fg '" ++ colorWhiteAlt  ++ "' -fn '" ++ myFont  ++ "' -e 'button3=;onstart=lower'"
 dzenBar3 = "dzen2 -xs 3 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" ++ statusBarHeight ++ "' -w '430' -ta 'l' -bg '" ++ colorDarkGray ++ "' -fg '" ++ colorWhiteAlt  ++ "' -fn '" ++ myFont  ++ "' -e 'button3=;onstart=lower'"
 dzenStatusBar = "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ") >(" ++ dzenBar3 ++ ")\""
+dzens c = if c == 3 then "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ") >(" ++ dzenBar3 ++ ")\"" else if c == 2 then "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ")\"" else dzenBar1
+-- TODO: dzenStatusBar = dzens screenCount
+
+-- TODO
 -- if screenCount == 1 then
 --     dzenStatusBar = dzen1Bar
 -- else if screenCount == 2 then
@@ -143,7 +150,8 @@ dzenStatusBar = "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ") >(" 
 -- else if screenCount == 3 then
 --     dzenStatusBar = "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ") >(" ++ dzenBar3 ++ ")\""
 
-restartCmd = "xkill -display :0 -id $(xwininfo -name 'xmonad_rbar' | grep 'Window id' | awk '{ print $4 }'); xkill -display :0-id $(xwininfo -name 'xmonad_lbar' | grep 'Window id' | awk '{ print $4 }'); xmonad --recompile; xmonad --restart;"
+restartCmd = "killall status.sh dzen2 conky; xmonad --recompile; xmonad --restart"
+--restartCmd = "xkill -display :0 -id $(xwininfo -name 'xmonad_rbar' | grep 'Window id' | awk '{ print $4 }'); xkill -display :0-id $(xwininfo -name 'xmonad_lbar' | grep 'Window id' | awk '{ print $4 }'); xmonad --recompile; xmonad --restart;"
 -- testCmd = ""
 
 -- UrgencyHook
@@ -180,8 +188,8 @@ main = do
                  -- hooks, layouts
                  layoutHook = myLayout,
                  manageHook = myManageHook,
-                 handleEventHook = myEventHook,
-                 logHook = myLogHook d,
+                 handleEventHook = fullscreenEventHook, -- fixes chrome fullscreen 
+                 logHook = myLogHook d, -- >> updatePointer (Relative 0.5 0.5),
                  startupHook = myStartupHook
              }
 
@@ -191,6 +199,7 @@ main = do
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     [ -- Scratchpads
       ((modm .|. shiftMask, xK_n), namedScratchpadAction myScratchPads "music"),
+      ((modm .|. shiftMask, xK_p), namedScratchpadAction myScratchPads "pulse"),
       ((modm .|. shiftMask, xK_t), namedScratchpadAction myScratchPads "terminal"),
       ((modm .|. shiftMask, xK_v), namedScratchpadAction myScratchPads "keyboard"),
       ((modm, xK_e), namedScratchpadAction myScratchPads "filebrow"),
@@ -251,8 +260,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     ++
     [ ((m .|. modm, k), windows $ f i)
-        | (i, k) <- zip (XMonad.workspaces conf) [xK_1 .. xK_9]
-        , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]
+        | (i, k) <- zip (XMonad.workspaces conf) [xK_1 .. xK_9],
+          (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]
     ]
     -- zip (zip (repeat (modm)) [xK_1..xK_9]) (map (withNthWorkspace W.greedyView) [0..])
     -- ++
@@ -262,12 +271,18 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- mod-{w,e,r}, Switch to physical/Xinerama screens 1, 2, or 3
     -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
     --
-    -- [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
-    -- | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
-    -- , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
+    -- ++
+    -- [ ((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
+    --     | (key, sc) <- zip [xK_F1, xK_F2, xK_F3] [0..],
+    --          (f, m) <- [(W.view, 0), (W.shift, shiftMask)]
+    -- ]
+
     ++
     [ ((modm, xK_Left), DO.moveTo Prev (WSIs notSP)),
       ((modm, xK_Right), DO.moveTo Next (WSIs notSP)),
+      -- Focus next/previous screen
+      ((modm .|. mod1Mask, xK_Left), nextScreen),
+      ((modm .|. mod1Mask, xK_Right), prevScreen), 
       ((modm, xK_Up), toggleWS),
       ((modm, xK_Down), moveTo Next EmptyWS)]
         where notSP = (return $ ("NSP" /=) . W.tag) :: X (WindowSpace -> Bool)
@@ -300,7 +315,8 @@ myManageHook = composeAll
       resource  =? "desktop_window" --> doIgnore,
       resource  =? "kdesktop" --> doIgnore,
      (className =? "Firefox" <&&> resource =? "Navigator") --> doF (W.shift webWs) <+> unfloat,
-      className =? "Chromium" --> doF (W.shift webWs),
+      appName   =? "tmux" --> doF (W.shift mainWs),
+      className =? "Chromium" --> doF (W.shift chrmWs),
       className =? "luakit" --> doF (W.shift webWs),
       className =? "uzbl-tabbed" --> doF (W.shift webWs),
       className =? "Eclipse" --> doF (W.shift devWs),
@@ -318,6 +334,7 @@ myManageHook = composeAll
 myScratchPads = [ NS "terminal" spawnTerm findTerm manageTerm,
                   NS "keyboard" spawnKb findKb manageTerm,
                   NS "music" spawnMusic findMusic manageMusic,
+                  NS "pulse" spawnPulse findPulse managePulse,
                   NS "filebrow" spawnFiles findFiles manageFiles ]
 
   where
@@ -327,6 +344,15 @@ myScratchPads = [ NS "terminal" spawnTerm findTerm manageTerm,
       where
         h = 0.6 -- height, 60%
         w = 0.6 -- width, 60
+        t = (1 - h)/2 -- centered top/bottom
+        l = (1 - w)/2 -- centered left/right
+
+    spawnPulse  = "pavucontrol" 
+    findPulse   = className =? "Pavucontrol" -- its window will be named "ncmpcpp" (see above)
+    managePulse = customFloating $ W.RationalRect l t w h -- and I'd like it fixed using the geometry below:
+      where
+        h = 0.8 -- height, 60%
+        w = 0.8 -- width, 60
         t = (1 - h)/2 -- centered top/bottom
         l = (1 - w)/2 -- centered left/right
 
@@ -356,9 +382,6 @@ myScratchPads = [ NS "terminal" spawnTerm findTerm manageTerm,
         w = 0.6 -- width, 60%
         t = (1 - h)/2 -- centered top/bottom
         l = (1 - w)/2 -- centered left/right
-
-
-myEventHook = mempty
 
 dzenSwitchWs :: String -> String
 dzenSwitchWs s = "^ca(1,~/bin/switch-workspace.sh " ++ (show s) ++ ")" ++ s ++ "^ca()"
