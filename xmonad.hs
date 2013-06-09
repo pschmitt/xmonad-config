@@ -22,10 +22,11 @@ import XMonad.Layout.Combo
 import XMonad.Layout.Gaps
 import XMonad.Layout.GridVariants
 import XMonad.Layout.LayoutCombinators
-import XMonad.Layout.NoBorders
+--import qualified XMonad.Layout.Magnifier as Mag
 import XMonad.Layout.Maximize
 import XMonad.Layout.Minimize
 import XMonad.Layout.MouseResizableTile
+import XMonad.Layout.NoBorders
 import XMonad.Layout.Named -- Rename Layouts
 import XMonad.Layout.ResizableTile
 import XMonad.Layout.SimplestFloat
@@ -46,16 +47,16 @@ import XMonad.Util.WorkspaceCompare
 
 myTerminal = "urxvtc"
 myFocusFollowsMouse :: Bool
-myFocusFollowsMouse = True --False -- Sloppy focus
+myFocusFollowsMouse = False -- Sloppy focus
 myBorderWidth = 0
 defaultModMask = mod4Mask
-statusBarHeight = "14"
+statusBarHeight = "16"
 
 --
 -- Fonts
 --
-myFont       = "-*-tamsyn-*-*-*-*-9-*-*-*-*-*-*-*"
-myUrgentFont = "-*-monospace-*-*-*-*-12-*-*-*-*-*-*-*"
+myFont       = "-*-tamsyn-*-*-*-*-12-*-*-*-*-*-*-*"
+myUrgentFont = "-*-monospace-*-*-*-*-14-*-*-*-*-*-*-*"
 
 --
 -- Colors
@@ -85,7 +86,7 @@ colorSeparator   = "#303030"
 
 myXPConfig = defaultXPConfig {
     position = Top,
-    height   = 14,
+    height   = 16,
     font     = myFont,
     fgColor  = colorWhiteAlt,
     bgColor  = colorDarkGray,
@@ -99,18 +100,20 @@ myXPConfig = defaultXPConfig {
 --
 mainWs = "#!"
 webWs  = "net"
+tvWs   = "tv"
 vidWs  = "vid"
 chrmWs = "y2t"
 devWs  = "dev"
-workWs = "uni"
+workWs = "wrk"
 dlWs   = "dl"
 rdWs   = "rd"
-myWorkspaces = [mainWs, webWs, vidWs, chrmWs, devWs, workWs, dlWs, rdWs, "9"]
+myWorkspaces = [mainWs, webWs, tvWs, vidWs, chrmWs, devWs, workWs, dlWs, rdWs]
 
 --
 -- Layouts
 --
 myLayout = gaps [(XMonad.Layout.Gaps.R, 0)]
+         -- $ Mag.magnifier
          $ avoidStruts
          $ smartBorders
          $ maximize
@@ -232,6 +235,12 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       ((modm .|. controlMask, xK_a), sendMessage $ IncGap 20 XMonad.Layout.Gaps.R),  -- increment the right-hand gap
       ((modm .|. controlMask, xK_s), sendMessage $ DecGap 20 XMonad.Layout.Gaps.R),  -- decrement the right-hand gap
       ((modm, xK_g), goToSelected defaultGSConfig),
+      -- Magnifier
+      --((modm .|. controlMask              , xK_plus ), sendMessage Mag.MagnifyMore),
+      --((modm .|. controlMask              , xK_minus), sendMessage Mag.MagnifyLess),
+      --((modm .|. controlMask              , xK_o), sendMessage Mag.ToggleOff),
+      --((modm .|. controlMask .|. shiftMask, xK_o), sendMessage Mag.ToggleOn),
+      --((modm .|. controlMask              , xK_m), sendMessage Mag.Toggle),
       -- Exit / Restart
       ((modm .|. shiftMask, xK_Escape), io (exitWith ExitSuccess)),
       ((modm .|. shiftMask, xK_r), spawn restartCmd),
@@ -305,26 +314,32 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
       ((modm, button2), (\w -> focus w >> windows W.shiftMaster)),
       ((modm, button3), (\w -> focus w >> Flex.mouseResizeWindow w >> windows W.shiftMaster)) ]
 
-myManageHook = composeAll
-    [ className =? "MPlayer" --> doFloat <+> doF (W.shift vidWs),
-      className =? "Gimp" --> doFloat,
-      className =? "Zenity" --> doFloat,
-      className =? "XVkbd"   --> doIgnore,
-      --className =? "Keyboard" --> doIgnore,
-      --title     =? "Keyboard"      --> doIgnore,
-      resource  =? "desktop_window" --> doIgnore,
-      resource  =? "kdesktop" --> doIgnore,
-     (className =? "Firefox" <&&> resource =? "Navigator") --> doF (W.shift webWs) <+> unfloat,
-      appName   =? "tmux" --> doF (W.shift mainWs),
-      className =? "Chromium" --> doF (W.shift chrmWs),
-      className =? "luakit" --> doF (W.shift webWs),
-      className =? "uzbl-tabbed" --> doF (W.shift webWs),
-      className =? "Eclipse" --> doF (W.shift devWs),
-      className =? "jd-Main" --> doF (W.shift dlWs),
-      className =? "Vlc" --> doF (W.shift vidWs),
-      className =? "rdesktop" --> doF (W.shift rdWs),
-      className =? "stalonetray" --> doIgnore,
-      isFullscreen --> doFullFloat
+myManageHook = composeOne
+    [ 
+      isDialog               -?> doFloat,
+      className =? "MPlayer" -?> doFloat,
+      className =? "Gimp" -?> doFloat,
+      className =? "Zenity" -?> doFloat,
+      className =? "XVkbd"   -?> doIgnore,
+      --className =? "Keyboard" -?> doIgnore,
+      --title     =? "Keyboard"      -?> doIgnore,
+      title     =? "YouTube TV - Mozilla Firefox" -?> doFullFloat,
+      className =? "YouTube TV - Mozilla Firefox" -?> doFullFloat,
+      resource  =? "desktop_window" -?> doIgnore,
+      resource  =? "kdesktop" -?> doIgnore,
+     (className =? "Firefox" <&&> resource =? "Navigator") -?> doF (W.shift webWs) <+> unfloat,
+      appName   =? "tmux" -?> doF (W.shift mainWs),
+      className =? "Chromium" -?> doF (W.shift chrmWs),
+      className =? "luakit" -?> doF (W.shift webWs),
+      className =? "uzbl-tabbed" -?> doF (W.shift webWs),
+      className =? "Eclipse" -?> doF (W.shift devWs),
+      className =? "jd-Main" -?> doF (W.shift dlWs),
+      className =? "Vlc" -?> doF (W.shift vidWs),
+      className =? "xbmc.bin" -?> doF (W.shift tvWs) <+> doFullFloat,
+      className =? "rdesktop" -?> doF (W.shift rdWs),
+      className =? "stalonetray" -?> doIgnore,
+      --isFullscreen -?> (doF W.focusDown <+> doFullFloat)
+      isFullscreen -?> doFullFloat
     ] <+> namedScratchpadManageHook myScratchPads <+> manageDocks -- <+> doFloat
     where unfloat = ask >>= doF . W.sink
 
@@ -374,8 +389,8 @@ myScratchPads = [ NS "terminal" spawnTerm findTerm manageTerm,
         t = 1 - h -- bottom edge
         l = (1 - w)/2 -- centered left/right
 
-    spawnFiles  = "spacefm"
-    findFiles   = resource =? "spacefm" -- <&&> title /=? "Copying..."
+    spawnFiles  = "thunar"
+    findFiles   = resource =? "thunar" <&&> title /=? "Open Location" <&&> title /=? "File Manager Preferences"
     manageFiles = customFloating $ W.RationalRect l t w h -- and I'd like it fixed using the geometry below
       where
         h = 0.8 -- height, 60%

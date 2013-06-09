@@ -10,11 +10,11 @@ DZEN_TITLE="xmonad_rbar"
 DZEN_TA="r" # Alignment
 BG='#161616'
 FG='#8c8b8e'
-FONT="Tamsyn-9"
+FONT="Tamsyn-12"
 
 XPOS=430
 YPOS=0
-HEIGHT=14
+HEIGHT=16
 
 DZEN_CMD="tee >(dzen2 \
     -dock \
