@@ -10,6 +10,7 @@ import qualified XMonad.Actions.DynamicWorkspaceOrder as DO
 import XMonad.Actions.FindEmptyWorkspace -- Switch to an empty WS
 import qualified XMonad.Actions.FlexibleResize as Flex -- Resize windows with mouse from any corner
 import XMonad.Actions.GridSelect
+--import XMonad.Actions.PhysicalScreens
 --import XMonad.Actions.UpdatePointer
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
@@ -329,10 +330,12 @@ myManageHook = composeOne
       resource  =? "kdesktop" -?> doIgnore,
      (className =? "Firefox" <&&> resource =? "Navigator") -?> doF (W.shift webWs) <+> unfloat,
       appName   =? "tmux" -?> doF (W.shift mainWs),
-      className =? "Chromium" -?> doF (W.shift chrmWs),
+      className =? "Chromium" -?> doF (W.shift webWs),
       className =? "luakit" -?> doF (W.shift webWs),
       className =? "uzbl-tabbed" -?> doF (W.shift webWs),
       className =? "Eclipse" -?> doF (W.shift devWs),
+      className =? "jetbrains-idea-ce" -?> doF (W.shift devWs),
+      className =? "jetbrains-android-studio" -?> doF (W.shift devWs),
       className =? "jd-Main" -?> doF (W.shift dlWs),
       className =? "Vlc" -?> doF (W.shift vidWs),
       className =? "xbmc.bin" -?> doF (W.shift tvWs) <+> doFullFloat,
@@ -389,8 +392,8 @@ myScratchPads = [ NS "terminal" spawnTerm findTerm manageTerm,
         t = 1 - h -- bottom edge
         l = (1 - w)/2 -- centered left/right
 
-    spawnFiles  = "thunar"
-    findFiles   = resource =? "thunar" <&&> title /=? "Open Location" <&&> title /=? "File Manager Preferences"
+    spawnFiles  = "spacefm"
+    findFiles   = resource =? "spacefm" -- <&&> title /=? "Open Location" <&&> title /=? "File Manager Preferences"
     manageFiles = customFloating $ W.RationalRect l t w h -- and I'd like it fixed using the geometry below
       where
         h = 0.8 -- height, 60%
