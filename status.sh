@@ -5,12 +5,13 @@
 
 SCREENCOUNT=$(xrdr count)
 CONKYRC=$XDG_CONFIG_HOME/conky/conkyrc
+CONKYRC_SMALL=$XDG_CONFIG_HOME/conky/conkyrc_small
 
 DZEN_TITLE="xmonad_rbar"
 DZEN_TA="r" # Alignment
 BG='#161616'
 FG='#8c8b8e'
-FONT="Tamsyn-12"
+FONT="Consolas-12"
 
 XPOS=430
 YPOS=0
@@ -30,9 +31,12 @@ DZEN_CMD="tee >(dzen2 \
     -fn \"$FONT\" \
     -e \"button3=;onstart=lower\")"
 
+
+conky -c $CONKYRC | eval $DZEN_CMD & # | tee > /var/log/statusbar.log
+
 case $SCREENCOUNT in
     3)
-        DZEN_CMD="${DZEN_CMD} >(dzen2 \
+        DZEN_CMD="tee >(dzen2 \
             -dock \
             -title-name \"${DZEN_TITLE}_3\" \
             -u \
@@ -63,5 +67,7 @@ case $SCREENCOUNT in
         ;;
 esac
 
-conky -c $CONKYRC | eval $DZEN_CMD & # | tee > /var/log/statusbar.log
+#xrandr | grep " connected" | awk '{print $4}'
+
+conky -c $CONKYRC_SMALL | eval $DZEN_CMD & # | tee > /var/log/statusbar.log
 
