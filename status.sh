@@ -1,7 +1,7 @@
 #!/bin/zsh
 # Author: Philipp Schmitt
-# Dependencies: xrdr (https://github.com/pschmitt/bin)
-# Version: 
+# Dependencies: xrdr (https://github.com/pschmitt/xrdr)
+# Version: 1.0
 
 SCREENCOUNT=$(xrdr count)
 CONKYRC=$XDG_CONFIG_HOME/conky/conkyrc
@@ -50,7 +50,7 @@ for screen in $(seq $SCREENCOUNT); do
     fi
 done
 
-if [[ -n $DZEN_SMALL_CMD ]]; then 
+if [[ -n $DZEN_SMALL_CMD ]]; then
     conky -c $CONKYRC_SMALL | eval $DZEN_SMALL_CMD &
 fi
 if [[ -n $DZEN_LARGE_CMD ]]; then
