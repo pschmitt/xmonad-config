@@ -17,7 +17,7 @@ XPOS=430
 YPOS=0
 HEIGHT=16
 
-DZEN_CMD="tee >(dzen2 \
+DZEN_TEMPLATE="dzen2 \
     -dock \
     -title-name \"$DZEN_TITLE\" \
     -u \
@@ -29,45 +29,31 @@ DZEN_CMD="tee >(dzen2 \
     -bg \"$BG\" \
     -fg \"$FG\" \
     -fn \"$FONT\" \
-    -e \"button3=;onstart=lower\")"
+    -e \"button3=;onstart=lower\""
 
+for screen in $(seq $SCREENCOUNT); do
+    dzen_cmd=$(sed -e "s/\($DZEN_TITLE\)/\1_$screen/;\
+                       s/\(-xs 1\)/-xs $screen/"\
+               <<< "$DZEN_TEMPLATE")
+    if xrdr vertical $screen; then
+        if [[ -z $DZEN_SMALL_CMD ]]; then
+            DZEN_SMALL_CMD="tee >($dzen_cmd)"
+        else
+            DZEN_SMALL_CMD="$DZEN_SMALL_CMD >($dzen_cmd)"
+        fi
+    else
+        if [[ -z $DZEN_LARGE_CMD ]]; then
+            DZEN_LARGE_CMD="tee >($dzen_cmd)"
+        else
+            DZEN_LARGE_CMD="$DZEN_LARGE_CMD >($dzen_cmd)"
+        fi
+    fi
+done
 
-conky -c $CONKYRC | eval $DZEN_CMD & # | tee > /var/log/statusbar.log
-
-case $SCREENCOUNT in
-    3)
-        DZEN_CMD="tee >(dzen2 \
-            -dock \
-            -title-name \"${DZEN_TITLE}_3\" \
-            -u \
-            -xs 3 \
-            -x \"$XPOS\" \
-            -y \"$YPOS\" \
-            -h \"$HEIGHT\" \
-            -ta \"$DZEN_TA\" \
-            -bg \"$BG\" \
-            -fg \"$FG\" \
-            -fn \"$FONT\" \
-            -e \"button3=;onstart=lower\")"
-        ;&
-    2)
-        DZEN_CMD="${DZEN_CMD} >(dzen2 \
-            -dock \
-            -title-name \"${DZEN_TITLE}_2\" \
-            -u \
-            -xs 2 \
-            -x \"$XPOS\" \
-            -y \"$YPOS\" \
-            -h \"$HEIGHT\" \
-            -ta \"$DZEN_TA\" \
-            -bg \"$BG\" \
-            -fg \"$FG\" \
-            -fn \"$FONT\" \
-            -e \"button3=;onstart=lower\")"
-        ;;
-esac
-
-#xrandr | grep " connected" | awk '{print $4}'
-
-conky -c $CONKYRC_SMALL | eval $DZEN_CMD & # | tee > /var/log/statusbar.log
+if [[ -n $DZEN_SMALL_CMD ]]; then 
+    conky -c $CONKYRC_SMALL | eval $DZEN_SMALL_CMD &
+fi
+if [[ -n $DZEN_LARGE_CMD ]]; then
+    conky -c $CONKYRC | eval $DZEN_LARGE_CMD &
+fi
 
