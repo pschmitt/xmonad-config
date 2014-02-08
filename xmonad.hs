@@ -12,6 +12,7 @@ import qualified XMonad.Actions.FlexibleResize as Flex -- Resize windows with mo
 import XMonad.Actions.GridSelect
 --import XMonad.Actions.PhysicalScreens
 --import XMonad.Actions.UpdatePointer
+import XMonad.Actions.Warp
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
@@ -242,6 +243,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       --((modm .|. controlMask              , xK_o), sendMessage Mag.ToggleOff),
       --((modm .|. controlMask .|. shiftMask, xK_o), sendMessage Mag.ToggleOn),
       --((modm .|. controlMask              , xK_m), sendMessage Mag.Toggle),
+
       -- Exit / Restart
       ((modm .|. shiftMask, xK_Escape), io (exitWith ExitSuccess)),
       ((modm .|. shiftMask, xK_r), spawn restartCmd),
@@ -263,7 +265,11 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
                                         sendMessage ToggleStruts),
       -- Minimize
       ((modm, xK_u), withFocused minimizeWindow),
-      ((modm .|. shiftMask, xK_u), sendMessage RestoreNextMinimizedWin)
+      ((modm .|. shiftMask, xK_u), sendMessage RestoreNextMinimizedWin),
+      -- Warp
+      ((modm .|. controlMask, xK_1), warpToScreen 0 0.5 0.5),
+      ((modm .|. controlMask, xK_2), warpToScreen 1 0.5 0.5),
+      ((modm .|. controlMask, xK_3), warpToScreen 2 0.5 0.5)
       -- Test
       -- ((modm, xK_y), spawn testCmd)
     ]
