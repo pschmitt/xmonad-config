@@ -132,10 +132,10 @@ layout = gaps [(XMonad.Layout.Gaps.R, 0), (XMonad.Layout.Gaps.D, 0)]
            where
                tiled   = ResizableTall nmaster delta ratio []
                nmaster = 1
-               ratio   = 1/2
-               delta   = 3/100
+               ratio   = 1 / 2
+               delta   = 3 / 100
                combo   = combineTwo (ResizableTall nmaster delta ratio []) (simpleTabbed) (simpleTabbed)
-               grid    = Grid (16/9)
+               grid    = Grid (16 / 9)
 
 --
 -- Spawn commands
@@ -158,10 +158,8 @@ dzens c =
         else
             dzenBar1
 
-dzenStatusBar = dzens 1
-
-widgetCmd = "~/.xmonad/status.sh -x '" ++ statusBarWidth ++ "' -h '" ++ statusBarHeight
-          ++ "' --fn '" ++ Main.font ++ "' --bg '" ++ colorDarkGray ++ "' --fg '" ++ colorWhiteAlt ++ "'"
+statusBarCmd = "~/.xmonad/status.sh -x '" ++ statusBarWidth ++ "' -h '" ++ statusBarHeight
+            ++ "' --fn '" ++ Main.font ++ "' --bg '" ++ colorDarkGray ++ "' --fg '" ++ colorWhiteAlt ++ "'"
 
 restartCmd = "xmonad --recompile && { killall status.sh dzen2 conky; xmonad --restart; }"
 
@@ -180,7 +178,7 @@ instance UrgencyHook NotifyUrgencyHook where
 
 main = do
     nScreens <- countScreens
-    d <- spawnPipe dzenStatusBar
+    d <- spawnPipe (dzens nScreens)
     xmonad $ withUrgencyHookC NotifyUrgencyHook urgencyConfig { suppressWhen = Visible }
            $ ewmh
            $ defaultConfig {
@@ -407,5 +405,5 @@ logHook h = dynamicLogWithPP $ defaultPP
 startupHook = startup
 startup :: X ()
 startup = do
-    spawn widgetCmd
+    spawn statusBarCmd
     setWMName "LG3D"
