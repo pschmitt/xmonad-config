@@ -11,11 +11,11 @@ DZEN_TITLE="xmonad_rbar"
 DZEN_TA="r" # Alignment
 BG='#161616'
 FG='#8c8b8e'
-FONT="Consolas-12"
+FONT="Tamsyn-16"
 
 XPOS=430
 YPOS=0
-HEIGHT=16
+HEIGHT=20
 
 DZEN_TEMPLATE="dzen2 \
     -dock \
@@ -29,7 +29,7 @@ DZEN_TEMPLATE="dzen2 \
     -bg \"$BG\" \
     -fg \"$FG\" \
     -fn \"$FONT\" \
-    -e \"button3=;onstart=lower\""
+    -e \"button3=\""
 
 for screen in $(seq $SCREENCOUNT); do
     dzen_cmd=$(sed -e "s/\($DZEN_TITLE\)/\1_$screen/;\
