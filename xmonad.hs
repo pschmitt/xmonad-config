@@ -114,7 +114,7 @@ workspaces = [mainWs, webWs, tvWs, vidWs, chrmWs, devWs, workWs, dlWs, rdWs]
 --
 -- Layouts
 --
-layout = gaps [(XMonad.Layout.Gaps.R, 0), (XMonad.Layout.Gaps.D, 0)]
+layout = gaps' [((XMonad.Layout.Gaps.R, 0), False), ((XMonad.Layout.Gaps.D, 270), False)]
          -- $ Mag.magnifier
          $ avoidStruts
          $ smartBorders
@@ -211,7 +211,7 @@ keys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((modm .|. shiftMask, xK_p), namedScratchpadAction scratchpads "pulse")
       , ((modm .|. shiftMask, xK_t), namedScratchpadAction scratchpads "terminal")
       , ((modm .|. shiftMask, xK_v), do namedScratchpadAction scratchpads "keyboard"
-                                        sendMessage $ IncGap 270 XMonad.Layout.Gaps.D)
+                                        sendMessage $ ToggleGap XMonad.Layout.Gaps.D)
       , ((modm, xK_e), namedScratchpadAction scratchpads "filebrow")
       -- Launcher
       , ((modm, xK_p), shellPrompt xpConfig)
