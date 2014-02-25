@@ -17,6 +17,44 @@ XPOS=430
 YPOS=0
 HEIGHT=20
 
+ARGS=$(getopt -o "x:w:h:" -l "bg:,fg:,fn:" -n "$0" -- "$@")
+
+[[ $? -ne 0 ]] && { echo "Woops, wrong params."; exit 1; }
+
+eval set -- "$ARGS"
+
+while true; do
+    case "$1" in
+        -x)
+            XPOS=$2
+            shift 2
+            ;;
+        -h)
+            HEIGHT=$2
+            shift 2
+            ;;
+        --fg)
+            FG=$2
+            shift 2
+            ;;
+        --bg)
+            BG=$2
+            shift 2
+            ;;
+        --fn)
+            FONT=$2
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Internal error"
+            exit 1
+    esac
+done
+
 DZEN_TEMPLATE="dzen2 \
     -dock \
     -title-name \"$DZEN_TITLE\" \

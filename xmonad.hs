@@ -20,6 +20,7 @@ import XMonad.Layout.BoringWindows
 import XMonad.Layout.Combo
 import XMonad.Layout.Gaps
 import XMonad.Layout.GridVariants
+import XMonad.Layout.IndependentScreens (countScreens)
 import XMonad.Layout.LayoutCombinators
 import XMonad.Layout.Maximize
 import XMonad.Layout.Minimize
@@ -51,6 +52,7 @@ clickJustFocuses = True
 borderWidth = 0
 defaultModMask = mod4Mask
 statusBarHeight = "20"
+statusBarWidth  = "430"
 
 --
 -- Fonts
@@ -138,24 +140,30 @@ layout = gaps [(XMonad.Layout.Gaps.R, 0), (XMonad.Layout.Gaps.D, 0)]
 --
 -- Spawn commands
 --
-dzenBar1 = "dzen2 -xs 1 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" ++ statusBarHeight ++ "' -w '430' -ta 'l' -bg '" ++ colorDarkGray ++ "' -fg '" ++ colorWhiteAlt  ++ "' -fn '" ++ Main.font  ++ "' -e 'button3=;onstart=lower'"
-dzenBar2 = "dzen2 -xs 2 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" ++ statusBarHeight ++ "' -w '430' -ta 'l' -bg '" ++ colorDarkGray ++ "' -fg '" ++ colorWhiteAlt  ++ "' -fn '" ++ Main.font  ++ "' -e 'button3=;onstart=lower'"
-dzenBar3 = "dzen2 -xs 3 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" ++ statusBarHeight ++ "' -w '430' -ta 'l' -bg '" ++ colorDarkGray ++ "' -fg '" ++ colorWhiteAlt  ++ "' -fn '" ++ Main.font  ++ "' -e 'button3=;onstart=lower'"
-dzenStatusBar = dzenBar1
-dzens c = if c == 3 then "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ") >(" ++ dzenBar3 ++ ")\"" else if c == 2 then "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ")\"" else dzenBar1
--- TODO: dzenStatusBar = dzens screenCount
+dzenBar1 = "dzen2 -xs 1 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" ++ statusBarHeight
+        ++ "' -w '" ++ statusBarWidth ++ "' -ta 'l' -bg '" ++ colorDarkGray ++ "' -fg '" ++ colorWhiteAlt
+        ++ "' -fn '" ++ Main.font  ++ "' -e 'button3=;onstart=lower'"
+dzenBar2 = "dzen2 -xs 2 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" ++ statusBarHeight
+        ++ "' -w '" ++ statusBarWidth ++ "' -ta 'l' -bg '" ++ colorDarkGray ++ "' -fg '" ++ colorWhiteAlt
+        ++ "' -fn '" ++ Main.font  ++ "' -e 'button3=;onstart=lower'"
+dzenBar3 = "dzen2 -xs 3 -dock -title-name 'xmonad_lbar' -u -x '0' -y '0' -h '" ++ statusBarHeight
+        ++ "' -w '" ++ statusBarWidth ++ "' -ta 'l' -bg '" ++ colorDarkGray ++ "' -fg '" ++ colorWhiteAlt
+        ++ "' -fn '" ++ Main.font  ++ "' -e 'button3=;onstart=lower'"
 
--- TODO
--- if screenCount == 1 then
---     dzenStatusBar = dzen1Bar
--- else if screenCount == 2 then
---     dzenStatusBar = "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ")\""
--- else if screenCount == 3 then
---     dzenStatusBar = "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ") >(" ++ dzenBar3 ++ ")\""
+dzens c =
+        if c == 3 then
+            "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ") >(" ++ dzenBar3 ++ ")\""
+        else if c == 2 then
+            "zsh -c \"tee >(" ++ dzenBar1  ++ ") >(" ++ dzenBar2  ++ ")\""
+        else
+            dzenBar1
 
-restartCmd = "killall status.sh dzen2 conky; xmonad --recompile; xmonad --restart"
---restartCmd = "xkill -display :0 -id $(xwininfo -name 'xmonad_rbar' | grep 'Window id' | awk '{ print $4 }'); xkill -display :0-id $(xwininfo -name 'xmonad_lbar' | grep 'Window id' | awk '{ print $4 }'); xmonad --recompile; xmonad --restart;"
--- testCmd = ""
+dzenStatusBar = dzens 1
+
+widgetCmd = "~/.xmonad/status.sh -x '" ++ statusBarWidth ++ "' -h '" ++ statusBarHeight
+          ++ "' --fn '" ++ Main.font ++ "' --bg '" ++ colorDarkGray ++ "' --fg '" ++ colorWhiteAlt ++ "'"
+
+restartCmd = "xmonad --recompile && { killall status.sh dzen2 conky; xmonad --restart; }"
 
 -- UrgencyHook
 -- https://github.com/vdemeester/xmonad-config/blob/master/.xmonad/xmonad.hs
@@ -165,12 +173,13 @@ data NotifyUrgencyHook = NotifyUrgencyHook deriving (Read, Show)
 instance UrgencyHook NotifyUrgencyHook where
     urgencyHook NotifyUrgencyHook w = do
         name <- getName w
-        ws <- gets windowset
+        ws   <- gets windowset
         whenJust (W.findTag w ws) (flash name)
       where flash name index =
                   spawn $ "notify-send " ++ "\"Urgent Window\" \"<b>" ++ (show name ++ "</b> requests your attention on workspace <b>" ++ index) ++ "</b>\""
 
 main = do
+    nScreens <- countScreens
     d <- spawnPipe dzenStatusBar
     xmonad $ withUrgencyHookC NotifyUrgencyHook urgencyConfig { suppressWhen = Visible }
            $ ewmh
@@ -203,7 +212,8 @@ keys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
         ((modm .|. shiftMask, xK_n), namedScratchpadAction scratchpads "music")
       , ((modm .|. shiftMask, xK_p), namedScratchpadAction scratchpads "pulse")
       , ((modm .|. shiftMask, xK_t), namedScratchpadAction scratchpads "terminal")
-      , ((modm .|. shiftMask, xK_v), sequence_ [ namedScratchpadAction scratchpads "keyboard", sendMessage $ IncGap 270 XMonad.Layout.Gaps.D ])
+      , ((modm .|. shiftMask, xK_v), do namedScratchpadAction scratchpads "keyboard"
+                                        sendMessage $ IncGap 270 XMonad.Layout.Gaps.D)
       , ((modm, xK_e), namedScratchpadAction scratchpads "filebrow")
       -- Launcher
       , ((modm, xK_p), shellPrompt xpConfig)
@@ -258,11 +268,6 @@ keys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       -- Minimize
       , ((modm, xK_u), withFocused minimizeWindow)
       , ((modm .|. shiftMask, xK_u), sendMessage RestoreNextMinimizedWin)
-      -- Program launcher
-      -- ((modm, xK_y), submap . M.fromList $
-      --   [ ((0, xK_w),     spawn "firefox")
-      --   , ((0, xK_p),     spawn "")
-      --   ])
     ]
 
     ++
@@ -290,27 +295,28 @@ mouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((modm, button3), (\w -> focus w >> Flex.mouseResizeWindow w >> windows W.shiftMaster)) ]
 
 manageHook = composeOne
-      [ isDialog               -?> doFloat
-      , className =? "MPlayer" -?> doFloat
-      , className =? "Gimp" -?> doFloat
-      , className =? "Zenity" -?> doFloat
-      , className =? "XVkbd"   -?> doIgnore
+      [ isDialog                -?> doFloat
+      , className =? "Zenity"   -?> doFloat
+      , className =? "XVkbd"    -?> doIgnore
+      , resource  =? "desktop_window" -?> doIgnore
+      -- Browsers
+      , (className =? "Firefox" <&&> resource =? "Navigator") -?> doF (W.shift webWs) <+> unfloat
       , title     =? "YouTube TV - Mozilla Firefox" -?> doFullFloat
       , className =? "YouTube TV - Mozilla Firefox" -?> doFullFloat
-      , resource  =? "desktop_window" -?> doIgnore
-      , resource  =? "kdesktop" -?> doIgnore
-      , (className =? "Firefox" <&&> resource =? "Navigator") -?> doF (W.shift webWs) <+> unfloat
-      , appName   =? "tmux" -?> doF (W.shift mainWs)
+      , appName   =? "tmux"     -?> doF (W.shift mainWs)
       , className =? "Chromium" -?> doF (W.shift webWs)
-      , className =? "luakit" -?> doF (W.shift webWs)
+      , className =? "luakit"   -?> doF (W.shift webWs)
       , className =? "uzbl-tabbed" -?> doF (W.shift webWs)
-      , className =? "Eclipse" -?> doF (W.shift devWs)
-      , className =? "jetbrains-idea-ce" -?> doF (W.shift devWs)
+      -- IDE
+      , className =? "Eclipse"                  -?> doF (W.shift devWs)
+      , className =? "jetbrains-idea-ce"        -?> doF (W.shift devWs)
       , className =? "jetbrains-android-studio" -?> doF (W.shift devWs)
-      , className =? "jd-Main" -?> doF (W.shift dlWs)
-      , className =? "Vlc" -?> doF (W.shift vidWs)
-      , className =? "xbmc.bin" -?> doF (W.shift tvWs) <+> doFullFloat
-      , className =? "rdesktop" -?> doF (W.shift rdWs)
+      -- Multimedia
+      , className =? "MPlayer"     -?> doFloat
+      , className =? "Gimp"        -?> doFloat
+      , className =? "jd-Main"     -?> doF (W.shift dlWs)
+      , className =? "Vlc"         -?> doF (W.shift vidWs)
+      , className =? "xbmc.bin"    -?> doF (W.shift tvWs) <+> doFullFloat
       , className =? "stalonetray" -?> doIgnore
       , isFullscreen -?> doFullFloat
       ] <+> namedScratchpadManageHook scratchpads <+> manageDocks -- <+> doFloat
@@ -330,8 +336,8 @@ scratchpads = [ NS "terminal" spawnTerm findTerm manageTerm
       where
         h = 0.6 -- height, 60%
         w = 0.6 -- width, 60%
-        t = (1 - h)/2 -- centered top/bottom
-        l = (1 - w)/2 -- centered left/right
+        t = (1 - h) / 2 -- centered top/bottom
+        l = (1 - w) / 2 -- centered left/right
 
     spawnPulse  = "pavucontrol"
     findPulse   = className =? "Pavucontrol" -- its window will be named "Pavucontrol"
@@ -339,8 +345,8 @@ scratchpads = [ NS "terminal" spawnTerm findTerm manageTerm
       where
         h = 0.8 -- height, 80%
         w = 0.8 -- width, 80%
-        t = (1 - h)/2 -- centered top/bottom
-        l = (1 - w)/2 -- centered left/right
+        t = (1 - h) / 2 -- centered top/bottom
+        l = (1 - w) / 2 -- centered left/right
 
     spawnTerm  = Main.terminal ++ " -name scratchpad" -- launch my terminal
     findTerm   = resource =? "scratchpad" -- its window will be named "scratchpad" (see above)
@@ -349,7 +355,7 @@ scratchpads = [ NS "terminal" spawnTerm findTerm manageTerm
         h = 0.25 -- height, 25%
         w = 1 -- width, 100%
         t = 1 - h -- bottom edge
-        l = (1 - w)/2 -- centered left/right
+        l = (1 - w) / 2 -- centered left/right
 
     spawnKb  = "matchbox-keyboard"
     findKb   = title =? "Keyboard" -- its window will be named "keyboard" (see above)
@@ -358,7 +364,7 @@ scratchpads = [ NS "terminal" spawnTerm findTerm manageTerm
         h = 0.25 -- height, 25%
         w = 1 -- width, 100%
         t = 1 - h -- bottom edge
-        l = (1 - w)/2 -- centered left/right
+        l = (1 - w) / 2 -- centered left/right
 
     spawnFiles  = "spacefm"
     findFiles   = resource =? "spacefm" -- <&&> title /=? "Open Location" <&&> title /=? "File Manager Preferences"
@@ -366,8 +372,8 @@ scratchpads = [ NS "terminal" spawnTerm findTerm manageTerm
       where
         h = 0.8 -- height, 80%
         w = 0.6 -- width, 60%
-        t = (1 - h)/2 -- centered top/bottom
-        l = (1 - w)/2 -- centered left/right
+        t = (1 - h) / 2 -- centered top/bottom
+        l = (1 - w) / 2 -- centered left/right
 
 dzenSwitchWs :: String -> String
 dzenSwitchWs s = "^ca(1,~/bin/switch-workspace.sh " ++ (show s) ++ ")" ++ s ++ "^ca()"
@@ -398,9 +404,8 @@ logHook h = dynamicLogWithPP $ defaultPP
                     "Maximize Minimize combining Tabbed Simplest and Tabbed Simplest with ResizableTall" -> "[*]")
        }
 
-
 startupHook = startup
 startup :: X ()
 startup = do
-    spawn "~/.xmonad/status.sh"
+    spawn widgetCmd
     setWMName "LG3D"
