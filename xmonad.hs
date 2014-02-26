@@ -114,7 +114,9 @@ workspaces = [mainWs, webWs, tvWs, vidWs, chrmWs, devWs, workWs, dlWs, rdWs]
 --
 -- Layouts
 --
-layout = gaps' [((XMonad.Layout.Gaps.R, 0), False), ((XMonad.Layout.Gaps.D, 270), False)]
+-- This requires xmonad-contrib-darcs
+-- layout = gaps' [((XMonad.Layout.Gaps.R, 0), False), ((XMonad.Layout.Gaps.D, 270), False)]
+layout = gaps [(XMonad.Layout.Gaps.R, 0), (XMonad.Layout.Gaps.D, 0)]
          -- $ Mag.magnifier
          $ avoidStruts
          $ smartBorders
@@ -310,6 +312,7 @@ manageHook = composeOne
       , className =? "jetbrains-idea-ce"        -?> doF (W.shift devWs)
       , className =? "jetbrains-android-studio" -?> doF (W.shift devWs)
       -- Multimedia
+      , className =? "Xournal"     -?> doF (W.shift tvWs)
       , className =? "MPlayer"     -?> doFloat
       , className =? "Gimp"        -?> doFloat
       , className =? "jd-Main"     -?> doF (W.shift dlWs)
@@ -384,7 +387,7 @@ logHook h = dynamicLogWithPP $ defaultPP
           , ppUrgent  = dzenColor colorGreen "" . dzenSwitchWs
           , ppWsSep   = " "
           , ppSep     = "^fg(" ++ colorSeparator ++ ") | ^fg()"
-          , ppTitle   = dzenColor colorWhiteAlt "" . wrap "< " " >"
+          , ppTitle   = dzenColor colorWhiteAlt ""
           , ppOutput  = hPutStrLn h
           -- Hide empty ws
           --ppHiddenNoWindows = dzenColor colorDarkWhite colorDarkGray . dzenSwitchWs
