@@ -367,8 +367,8 @@ scratchpads = [ NS "terminal" spawnTerm findTerm manageTerm
         t = 1 - h -- bottom edge
         l = (1 - w) / 2 -- centered left/right
 
-    spawnFiles  = "spacefm"
-    findFiles   = resource =? "spacefm" -- <&&> title /=? "Open Location" <&&> title /=? "File Manager Preferences"
+    spawnFiles  = "thunar"
+    findFiles   = resource =? "thunar" -- <&&> title /=? "Open Location" <&&> title /=? "File Manager Preferences"
     manageFiles = customFloating $ W.RationalRect l t w h -- and I'd like it fixed using the geometry below
       where
         h = 0.8 -- height, 80%
